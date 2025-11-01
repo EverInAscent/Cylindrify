@@ -1,18 +1,35 @@
+from . import addon_updater_ops
+
 bl_info = {
     "name": "Cylindrify",
-    "author": "John & ChatGPT",
-    "version": (1, 1, 0),
+    "author": "BlenderDesigns + ChatGPT",
+    "version": (1, 0, 0),
     "blender": (3, 3, 0),
-    "location": "View3D > Sidebar (N) > Cylinder SVG",
-    "description": "Import SVG, set cylinder dimensions (outer, inner, height), create subdivided cube, place SVG, and cylindrify by 360°. Optional apparent-width preservation.",
+    "location": "View3D > Sidebar > Cylinder SVG",
+    "description": "Wrap SVG meshes into cylinders (automatic, distortion-free).",
+    "warning": "",
+    "doc_url": "https://github.com/EverInAscent/Cylindrify/",
+    "tracker_url": "https://github.com/EverInAscent/Cylindrify/issues",
     "category": "3D View",
 }
+
+# Updater settings
+addon_updater_ops.update_settings(
+    github_user="EverInAscent",
+    github_repo="Cylindrify",
+    use_release_zip=True,
+    addon_directory=__name__,
+)
 
 import bpy
 from bpy.types import Operator, Panel, PropertyGroup
 from bpy.props import StringProperty, EnumProperty, FloatProperty, PointerProperty, BoolProperty
 from math import radians, pi, asin
 from mathutils import Vector
+
+def draw_updater_ui(self, context):
+    layout = self.layout
+    addon_updater_ops.update_settings_ui(self, context)
 
 # ---------------------------
 # Helpers
@@ -307,6 +324,8 @@ class CYLSVG_PT_Main(Panel):
 
     def draw(self, context):
         layout = self.layout
+        layout.label(text=f"Cylindrify v{'.'.join(map(str, bl_info['version']))}", icon="INFO")
+
         p = context.scene.cylsvg_props
 
         # Import
@@ -336,6 +355,9 @@ class CYLSVG_PT_Main(Panel):
         layout.prop(p, "preserve_apparent_width")
         layout.operator("cylsvg.place_svg_on_cube_join", icon="AUTOMERGE_ON")
         layout.operator("cylsvg.cylindrify", icon="MOD_SIMPLEDEFORM")
+        layout.separator()
+        addon_updater_ops.update_settings_ui(self, context)
+
 
 # ---------------------------
 # Registration
